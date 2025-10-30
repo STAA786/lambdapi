@@ -1,16 +1,38 @@
-Transform: AWS::Serverless-2016-10-31
-Description: Trigger Lambda function from API
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda Deployment using CodePipeline & CodeBuild
+
+Parameters:
+  ArtifactBucket:
+    Type: String
+  ArtifactKey:
+    Type: String
+
 Resources:
-    MySAMLambda:
-        Type: AWS::Serverless::Function
-        Properties:
-            Handler: lambda_function.lambda_handler
-            Runtime: python3.10
-            CodeUri: ./
-            MemorySize: 128
-            Events:
-                ApiEvent:
-                    Type: Api
-                    Properties:
-                        Path: /test
-                        Method: get
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  WeatherLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: lambdapi
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaRole.Arn
+      Code:
+        S3Bucket: !Ref ArtifactBucket
+        S3Key: !Ref ArtifactKey
+      Timeout: 15
+
+Outputs:
+  LambdaFunctionName:
+    Value: lambdapi
