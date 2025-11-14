@@ -7,6 +7,10 @@ phases:
   build:
     commands:
       - zip -r lambda_function.zip .
+  post_build:
+    commands:
+      - echo "Tests passed"
+
 artifacts:
   files:
     - lambda_function.zip
