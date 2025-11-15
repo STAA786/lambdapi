@@ -2,15 +2,31 @@ version: 0.2
 
 phases:
   install:
+    runtime-versions:
+      python: 3.9
     commands:
-      - pip install -r requirements.txt -t .
+      - echo "Installing dependencies..."
+      - pip install --upgrade pip
+      - |
+        if [ -s requirements.txt ]; then
+          pip install -r requirements.txt -t .
+        else
+          echo "No dependencies to install"
+        fi
+  
   build:
     commands:
-      - zip -r lambda_function.zip .
-  post_build:
-    commands:
-      - echo "Tests passed"
+      - echo "Build started on `date`"
+      - echo "Packaging Lambda function..."
+      - zip -r lambda-deployment-package.zip lambda_function.py
+      - |
+        if [ -d "requests" ]; then
+          zip -r lambda-deployment-package.zip requests*
+        fi
+      - echo "Build completed on `date`"
 
 artifacts:
   files:
-    - lambda_function.zip
+    - lambda-deployment-package.zip
+    - template.yml
+  name: BuildArtifact
