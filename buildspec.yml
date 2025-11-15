@@ -4,55 +4,14 @@ phases:
   install:
     runtime-versions:
       python: 3.9
-    commands:
-      - echo "Installing dependencies..."
-      - pip install --upgrade pip
-      
-  pre_build:
-    commands:
-      - echo "Pre-build phase started on `date`"
-      - echo "Listing files in current directory:"
-      - ls -la
-      - echo "Current working directory:"
-      - pwd
       
   build:
     commands:
-      - echo "Build started on `date`"
-      - echo "Installing Python dependencies if requirements.txt exists..."
-      - |
-        if [ -f requirements.txt ] && [ -s requirements.txt ]; then
-          echo "Installing packages from requirements.txt"
-          pip install -r requirements.txt -t .
-        else
-          echo "No dependencies to install (requirements.txt is empty or missing)"
-        fi
-      - echo "Listing all files before packaging:"
+      - echo "Build started"
       - ls -la
-      - echo "Creating Lambda deployment package..."
-      - zip -r lambda-deployment-package.zip lambda_function.py
-      - echo "Adding installed packages to ZIP (if any)..."
-      - |
-        for dir in */; do
-          if [ -d "$dir" ] && [ "$dir" != "__pycache__/" ]; then
-            echo "Adding directory: $dir"
-            zip -r lambda-deployment-package.zip "$dir"
-          fi
-        done
-      - echo "Final ZIP contents:"
-      - unzip -l lambda-deployment-package.zip
-      - echo "Build completed on `date`"
+      - zip lambda-deployment-package.zip lambda_function.py
+      - ls -la lambda-deployment-package.zip
       
-  post_build:
-    commands:
-      - echo "Post-build phase started on `date`"
-      - echo "Verifying artifact was created..."
-      - ls -lh lambda-deployment-package.zip
-      - echo "Build process completed successfully!"
-
 artifacts:
   files:
     - lambda-deployment-package.zip
-    - template.yml
-  name: BuildArtifact
-  discard-paths: no
