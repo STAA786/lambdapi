@@ -5,42 +5,32 @@ phases:
     runtime-versions:
       python: 3.9
     commands:
-      - echo "=========================================="
-      - echo "INSTALL PHASE"
-      - echo "=========================================="
+      - echo "Installing Python 3.9"
       - python --version
-      - pip --version
       
   pre_build:
     commands:
       - echo "=========================================="
-      - echo "PRE_BUILD PHASE - Verifying Source Files"
+      - echo "PRE_BUILD - Verifying Files"
       - echo "=========================================="
       - pwd
-      - echo "Listing all files:"
       - ls -lah
-      - echo "Checking for lambda_function.py..."
-      - test -f lambda_function.py && echo "SUCCESS - lambda_function.py found" || (echo "ERROR - lambda_function.py not found" && exit 1)
+      - echo "Checking lambda_function.py..."
+      - ls -l lambda_function.py
       
   build:
     commands:
       - echo "=========================================="
-      - echo "BUILD PHASE - Creating Package"
+      - echo "BUILD - Creating Deployment Package"
       - echo "=========================================="
-      - echo "Creating ZIP..."
       - zip lambda-deployment-package.zip lambda_function.py
-      - echo "Verifying ZIP..."
       - ls -lh lambda-deployment-package.zip
       - unzip -l lambda-deployment-package.zip
-      - echo "Build completed successfully!"
+      - echo "Build completed!"
       
   post_build:
     commands:
-      - echo "=========================================="
-      - echo "POST_BUILD PHASE"
-      - echo "=========================================="
-      - echo "Artifact ready for upload"
-      - du -h lambda-deployment-package.zip
+      - echo "Artifact ready"
 
 artifacts:
   files:
