@@ -14,6 +14,9 @@ def lambda_handler(event, context):
         if not api_key:
             return {
                 'statusCode': 500,
+                'headers': {
+                    'Content-Type': 'application/json'
+                },
                 'body': json.dumps({
                     'error': 'API_KEY environment variable not set'
                 })
@@ -27,7 +30,7 @@ def lambda_handler(event, context):
         url = f"https://api.openweathermap.org/data/2.5/weather?q={city},{country_code}&appid={api_key}&units=imperial"
         
         # Make API request
-        with urllib.request.urlopen(url) as response:
+        with urllib.request.urlopen(url, timeout=10) as response:
             data = json.loads(response.read().decode())
         
         # Extract temperature data
@@ -60,16 +63,36 @@ def lambda_handler(event, context):
         }
         
     except urllib.error.HTTPError as e:
+        error_message = f'API request failed with status {e.code}'
+        if e.code == 401:
+            error_message = 'Invalid API key. Please check your OpenWeatherMap API key.'
         return {
             'statusCode': e.code,
+            'headers': {
+                'Content-Type': 'application/json'
+            },
             'body': json.dumps({
-                'error': f'API request failed: {str(e)}'
+                'error': error_message
+            })
+        }
+    except urllib.error.URLError as e:
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json'
+            },
+            'body': json.dumps({
+                'error': f'Network error: {str(e)}'
             })
         }
     except Exception as e:
         return {
             'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json'
+            },
             'body': json.dumps({
-                'error': f'Internal error: {str(e)}'
+                'error': f'Internal error: {str(e)}',
+                'error_type': type(e).__name__
             })
         }
